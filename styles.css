@@ -1,0 +1,238 @@
+.treegen-view {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	font-size: var(--font-ui-small);
+}
+
+/* ── Header ── */
+.treegen-header {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 8px 10px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	flex-shrink: 0;
+}
+
+.treegen-title-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.treegen-title {
+	font-weight: 600;
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+}
+
+.treegen-actions {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.treegen-icon-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 3px 5px;
+	border-radius: var(--radius-s);
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.treegen-icon-btn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+/* ── Format row ── */
+.treegen-format-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.treegen-format-switcher {
+	display: flex;
+	align-items: center;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	overflow: hidden;
+	flex: 1;
+}
+
+.treegen-format-btn {
+	flex: 1;
+	font-size: var(--font-ui-smaller);
+	padding: 3px 0;
+	border: none;
+	border-right: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.treegen-format-btn:last-child {
+	border-right: none;
+}
+
+.treegen-format-btn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.treegen-format-btn.is-active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.treegen-copy-all {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: var(--font-ui-smaller);
+	padding: 3px 8px;
+	border-radius: var(--radius-s);
+	background: var(--interactive-normal);
+	color: var(--text-muted);
+	border: none;
+	cursor: pointer;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.treegen-copy-all:hover {
+	background: var(--interactive-hover);
+	color: var(--text-normal);
+}
+
+/* ── Search ── */
+.treegen-search-row {
+	display: flex;
+}
+
+.treegen-search {
+	width: 100%;
+	font-size: var(--font-ui-small);
+	padding: 4px 8px;
+	border-radius: var(--radius-s);
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	color: var(--text-normal);
+	outline: none;
+}
+
+.treegen-search:focus {
+	border-color: var(--interactive-accent);
+}
+
+/* ── Tree ── */
+.treegen-tree {
+	flex: 1;
+	overflow-y: auto;
+	padding: 4px 0;
+}
+
+.treegen-row {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	padding-right: 6px;
+	border-radius: var(--radius-s);
+	user-select: none;
+	line-height: 1.4;
+}
+
+.treegen-folder-row {
+	cursor: pointer;
+}
+
+.treegen-folder-row:hover {
+	background: var(--background-modifier-hover);
+}
+
+.treegen-file-row {
+	cursor: pointer;
+}
+
+.treegen-file-row:hover {
+	background: var(--background-modifier-hover);
+}
+
+.treegen-file-row:hover .treegen-file-name {
+	color: var(--text-normal);
+}
+
+.treegen-match .treegen-file-name {
+	color: var(--text-accent);
+}
+
+.treegen-toggle {
+	flex-shrink: 0;
+	font-size: 14px;
+	color: var(--text-muted);
+	width: 18px;
+	text-align: center;
+}
+
+.treegen-folder-name {
+	flex: 1;
+	color: var(--text-normal);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.treegen-file-name {
+	flex: 1;
+	color: var(--text-muted);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.treegen-badge {
+	flex-shrink: 0;
+	font-size: 10px;
+	padding: 0 5px;
+	border-radius: 10px;
+	background: var(--background-modifier-border);
+	color: var(--text-faint);
+	line-height: 1.6;
+}
+
+.treegen-copy-btn {
+	flex-shrink: 0;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	padding: 2px 4px;
+	border-radius: var(--radius-s);
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.treegen-folder-row:hover .treegen-copy-btn,
+.treegen-file-row:hover .treegen-copy-btn {
+	display: flex;
+}
+
+.treegen-copy-btn:hover {
+	background: var(--background-modifier-border);
+	color: var(--text-normal);
+}
+
+.treegen-children {
+	display: none;
+}

@@ -1,0 +1,10 @@
+{
+  "id": "obsidian-treegen",
+  "name": "TreeGen",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Generate a copyable ASCII folder/file tree from any folder in your vault.",
+  "author": "30jannik06",
+  "authorUrl": "https://github.com/30jannik06",
+  "isDesktopOnly": false
+}

@@ -1,0 +1,26 @@
+{
+  "name": "obsidian-treegen",
+  "version": "1.0.0",
+  "description": "Obsidian plugin to generate copyable ASCII folder/file trees",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
+  },
+  "keywords": [],
+  "author": "30jannik06",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "esbuild": "^0.21.5",
+    "eslint": "^10.2.1",
+    "obsidian": "^1.6.0",
+    "typescript": "^5.5.3"
+  },
+  "packageManager": "pnpm@10.15.1"
+}

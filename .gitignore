@@ -1,0 +1,22 @@
+# Build output
+main.js
+main.js.map
+
+# Dependencies
+node_modules/
+
+# Obsidian plugin data (user-specific settings)
+data.json
+
+# Claude Code
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.user
