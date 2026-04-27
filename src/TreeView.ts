@@ -1,13 +1,23 @@
-import { ItemView, Notice, TAbstractFile, TFile, TFolder, WorkspaceLeaf } from "obsidian";
+import { ItemView, TAbstractFile, TFile, TFolder, WorkspaceLeaf } from "obsidian";
 import type TreeGenPlugin from "./main";
 
 export const TREEGEN_VIEW_TYPE = "treegen-view";
 
 type CopyFormat = "tree" | "paths" | "json";
 
-const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-const EXPAND_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"></polyline><polyline points="7 6 12 11 17 6"></polyline></svg>`;
+const COPY_ICON    = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+const CHECK_ICON   = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+const EXPAND_ICON  = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"></polyline><polyline points="7 6 12 11 17 6"></polyline></svg>`;
 const COLLAPSE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"></polyline><polyline points="17 18 12 13 7 18"></polyline></svg>`;
+const REFRESH_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>`;
+
+async function flashCopied(btn: HTMLElement, prevHtml: string): Promise<void> {
+	btn.innerHTML = CHECK_ICON;
+	btn.classList.add("treegen-copied");
+	await new Promise((r) => setTimeout(r, 1400));
+	btn.innerHTML = prevHtml;
+	btn.classList.remove("treegen-copied");
+}
 
 export class TreeGenView extends ItemView {
 	private plugin: TreeGenPlugin;
@@ -41,11 +51,15 @@ export class TreeGenView extends ItemView {
 
 		const header = container.createDiv("treegen-header");
 
-		// Row 1: title + expand/collapse + copy all
+		// Row 1: title + actions
 		const titleRow = header.createDiv("treegen-title-row");
 		titleRow.createEl("span", { text: "TreeGen", cls: "treegen-title" });
 
 		const actions = titleRow.createDiv("treegen-actions");
+
+		const refreshBtn = actions.createEl("button", { cls: "treegen-icon-btn", attr: { "aria-label": "Refresh" } });
+		refreshBtn.innerHTML = REFRESH_ICON;
+		refreshBtn.addEventListener("click", () => this.renderTree());
 
 		const expandBtn = actions.createEl("button", { cls: "treegen-icon-btn", attr: { "aria-label": "Expand all" } });
 		expandBtn.innerHTML = EXPAND_ICON;
@@ -78,11 +92,17 @@ export class TreeGenView extends ItemView {
 		});
 
 		const copyAllBtn = formatRow.createEl("button", { cls: "treegen-copy-all", attr: { "aria-label": "Copy vault tree" } });
-		copyAllBtn.innerHTML = COPY_ICON + " Copy all";
+		copyAllBtn.innerHTML = COPY_ICON + "<span> Copy all</span>";
 		copyAllBtn.addEventListener("click", async () => {
 			const root = this.app.vault.getRoot();
 			await navigator.clipboard.writeText(this.getFormatted(root));
-			new Notice("Vault tree copied!");
+			const span = copyAllBtn.querySelector("span")!;
+			const prev = span.textContent ?? " Copy all";
+			span.textContent = " Copied!";
+			copyAllBtn.classList.add("treegen-copied");
+			await new Promise((r) => setTimeout(r, 1400));
+			span.textContent = prev;
+			copyAllBtn.classList.remove("treegen-copied");
 		});
 
 		// Row 3: search
@@ -149,8 +169,8 @@ export class TreeGenView extends ItemView {
 	private getFormatted(folder: TFolder): string {
 		switch (this.copyFormat) {
 			case "paths": return this.plugin.generateFlatPaths(folder);
-			case "json": return this.plugin.generateJSON(folder);
-			default: return this.plugin.generateTree(folder);
+			case "json":  return this.plugin.generateJSON(folder);
+			default:      return this.plugin.generateTree(folder);
 		}
 	}
 
@@ -159,7 +179,7 @@ export class TreeGenView extends ItemView {
 		const { showFiles, maxDepth } = this.plugin.settings;
 		const query = this.filterQuery;
 
-		const children = this.sortChildren(folder.children)
+		const children = this.plugin.sortChildren(folder.children)
 			.filter((c) => !excludeSet.has(c.name))
 			.filter((c) => this.hasMatch(c, query));
 
@@ -170,15 +190,17 @@ export class TreeGenView extends ItemView {
 			return;
 		}
 
-		// When filter is active, always expand folders that have matching children
 		const isExpanded = query.length > 0 || this.expandedFolders.has(folder.path);
+		const isEmpty = visible.length === 0;
 		const fileCount = this.countFiles(folder, excludeSet);
 
-		const row = parent.createDiv("treegen-row treegen-folder-row");
+		const row = parent.createDiv(
+			"treegen-row treegen-folder-row" + (isEmpty ? " treegen-folder-empty" : "")
+		);
 		row.style.paddingLeft = `${depth * 16}px`;
 
 		const toggle = row.createSpan("treegen-toggle");
-		toggle.setText(isExpanded ? "▾" : "▸");
+		toggle.setText(isEmpty ? "·" : isExpanded ? "▾" : "▸");
 
 		row.createSpan({ text: folder.name, cls: "treegen-folder-name" });
 
@@ -190,8 +212,9 @@ export class TreeGenView extends ItemView {
 		copyBtn.innerHTML = COPY_ICON;
 		copyBtn.addEventListener("click", async (e) => {
 			e.stopPropagation();
+			if (copyBtn.classList.contains("treegen-copied")) return;
 			await navigator.clipboard.writeText(this.getFormatted(folder));
-			new Notice(`"${folder.name}" copied!`);
+			flashCopied(copyBtn, COPY_ICON);
 		});
 
 		const childContainer = parent.createDiv("treegen-children");
@@ -203,7 +226,7 @@ export class TreeGenView extends ItemView {
 
 		row.addEventListener("click", (e) => {
 			if ((e.target as HTMLElement).closest(".treegen-copy-btn")) return;
-			if (query.length > 0) return; // no toggling while filter is active
+			if (isEmpty || query.length > 0) return;
 			const expanded = this.expandedFolders.has(folder.path);
 			if (expanded) {
 				this.expandedFolders.delete(folder.path);
@@ -223,7 +246,9 @@ export class TreeGenView extends ItemView {
 		} else if (item instanceof TFile && this.plugin.settings.showFiles) {
 			const query = this.filterQuery;
 			const isMatch = !query || item.name.toLowerCase().includes(query);
-			const row = parent.createDiv("treegen-row treegen-file-row" + (isMatch && query ? " treegen-match" : ""));
+			const row = parent.createDiv(
+				"treegen-row treegen-file-row" + (isMatch && query ? " treegen-match" : "")
+			);
 			row.style.paddingLeft = `${depth * 16 + 18}px`;
 			row.createSpan({ text: item.name, cls: "treegen-file-name" });
 
@@ -231,8 +256,9 @@ export class TreeGenView extends ItemView {
 			copyBtn.innerHTML = COPY_ICON;
 			copyBtn.addEventListener("click", async (e) => {
 				e.stopPropagation();
+				if (copyBtn.classList.contains("treegen-copied")) return;
 				await navigator.clipboard.writeText(item.path);
-				new Notice(`Path copied!`);
+				flashCopied(copyBtn, COPY_ICON);
 			});
 
 			row.addEventListener("click", (e) => {
@@ -240,16 +266,6 @@ export class TreeGenView extends ItemView {
 				this.app.workspace.getLeaf(e.ctrlKey || e.metaKey).openFile(item);
 			});
 		}
-	}
-
-	private sortChildren(children: TAbstractFile[]): TAbstractFile[] {
-		return [...children].sort((a, b) => {
-			const aIsFolder = a instanceof TFolder;
-			const bIsFolder = b instanceof TFolder;
-			if (aIsFolder && !bIsFolder) return -1;
-			if (!aIsFolder && bIsFolder) return 1;
-			return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
-		});
 	}
 
 	async onClose(): Promise<void> {

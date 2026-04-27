@@ -233,6 +233,27 @@
 	color: var(--text-normal);
 }
 
+.treegen-copy-btn.treegen-copied,
+.treegen-copy-all.treegen-copied {
+	display: flex;
+	color: var(--text-success, #3fb950);
+}
+
+/* ── Empty folders ── */
+.treegen-folder-empty {
+	opacity: 0.45;
+	cursor: default;
+}
+
+.treegen-folder-empty .treegen-toggle {
+	color: var(--text-faint);
+}
+
+.treegen-folder-empty .treegen-folder-name {
+	color: var(--text-muted);
+	font-style: italic;
+}
+
 .treegen-children {
 	display: none;
 }

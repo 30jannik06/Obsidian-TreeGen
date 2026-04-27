@@ -1,5 +1,6 @@
 import esbuild from "esbuild";
 import process from "process";
+import { watch, utimesSync } from "fs";
 
 const prod = process.argv[2] === "production";
 
@@ -58,4 +59,12 @@ if (prod) {
   process.exit(0);
 } else {
   await context.watch();
+  watch("styles.css", () => {
+    try {
+      const now = new Date();
+      utimesSync("main.js", now, now);
+    } catch {
+      // ignore
+    }
+  });
 }

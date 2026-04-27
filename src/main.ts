@@ -11,6 +11,7 @@ import {
 import { TREEGEN_VIEW_TYPE, TreeGenView } from "./TreeView";
 
 export type IndentStyle = "lines" | "rounded" | "ascii" | "minimal" | "compact";
+export type SortOrder   = "foldersFirst" | "filesFirst" | "alphabetical";
 
 interface StyleDef {
 	branch: string;
@@ -30,6 +31,7 @@ export const INDENT_STYLES: Record<IndentStyle, StyleDef> = {
 interface TreeGenSettings {
 	maxDepth: number;
 	showFiles: boolean;
+	sortOrder: SortOrder;
 	excludePatterns: string;
 	indentStyle: IndentStyle;
 	rootName: "folder" | "path" | "none";
@@ -38,6 +40,7 @@ interface TreeGenSettings {
 const DEFAULT_SETTINGS: TreeGenSettings = {
 	maxDepth: 10,
 	showFiles: true,
+	sortOrder: "foldersFirst",
 	excludePatterns: ".obsidian,.git",
 	indentStyle: "lines",
 	rootName: "folder",
@@ -119,12 +122,20 @@ export default class TreeGenPlugin extends Plugin {
 		);
 	}
 
-	private sortChildren(children: TAbstractFile[]): TAbstractFile[] {
+	sortChildren(children: TAbstractFile[]): TAbstractFile[] {
+		const order = this.settings.sortOrder;
 		return [...children].sort((a, b) => {
-			const aIsFolder = a instanceof TFolder;
-			const bIsFolder = b instanceof TFolder;
-			if (aIsFolder && !bIsFolder) return -1;
-			if (!aIsFolder && bIsFolder) return 1;
+			if (order !== "alphabetical") {
+				const aIsFolder = a instanceof TFolder;
+				const bIsFolder = b instanceof TFolder;
+				if (order === "foldersFirst") {
+					if (aIsFolder && !bIsFolder) return -1;
+					if (!aIsFolder && bIsFolder) return 1;
+				} else {
+					if (!aIsFolder && bIsFolder) return -1;
+					if (aIsFolder && !bIsFolder) return 1;
+				}
+			}
 			return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
 		});
 	}
@@ -185,19 +196,26 @@ export default class TreeGenPlugin extends Plugin {
 	generateFlatPaths(folder: TFolder): string {
 		const excludeSet = this.getExcludeSet();
 		const paths: string[] = [];
-		this.collectPaths(folder, paths, excludeSet);
+		const stripPrefix = folder.path ? folder.path + "/" : "";
+		this.collectPaths(folder, paths, excludeSet, stripPrefix);
 		return paths.join("\n");
 	}
 
-	private collectPaths(folder: TFolder, paths: string[], excludeSet: Set<string>): void {
+	private collectPaths(
+		folder: TFolder,
+		paths: string[],
+		excludeSet: Set<string>,
+		stripPrefix: string
+	): void {
 		const children = this.sortChildren(folder.children).filter(
 			(c) => !excludeSet.has(c.name)
 		);
 		for (const child of children) {
 			if (child instanceof TFile && this.settings.showFiles) {
-				paths.push(child.path);
+				const p = child.path;
+				paths.push(stripPrefix && p.startsWith(stripPrefix) ? p.slice(stripPrefix.length) : p);
 			} else if (child instanceof TFolder) {
-				this.collectPaths(child, paths, excludeSet);
+				this.collectPaths(child, paths, excludeSet, stripPrefix);
 			}
 		}
 	}
@@ -265,6 +283,21 @@ class TreeGenSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.showFiles)
 					.onChange(async (value) => {
 						this.plugin.settings.showFiles = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Sort order")
+			.setDesc("How to sort items within each folder.")
+			.addDropdown((drop) =>
+				drop
+					.addOption("foldersFirst", "Folders first")
+					.addOption("filesFirst",   "Files first")
+					.addOption("alphabetical", "Alphabetical (mixed)")
+					.setValue(this.plugin.settings.sortOrder)
+					.onChange(async (value) => {
+						this.plugin.settings.sortOrder = value as SortOrder;
 						await this.plugin.saveSettings();
 					})
 			);
