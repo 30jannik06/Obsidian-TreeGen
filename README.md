@@ -13,14 +13,17 @@ Inspired by the [JetBrains TreeGen plugin](https://plugins.jetbrains.com/plugin/
 - **Live search** — filter the tree by name, matching files are highlighted
 - **Expand / Collapse all** — one click to open or close the entire tree
 - **Copy formats** — switch between Tree, Paths, and JSON before copying
+- **5 tree styles** — Lines, Rounded, ASCII, Minimal, Compact
 - **File count badges** — see how many files each folder contains at a glance
 - **Click to open** — click any file in the panel to open it; Ctrl+click opens in a new tab
 - **Per-folder copy** — copy button appears on hover for any folder
-- **Configurable** — max depth, exclude patterns, indent style, root label, show/hide files
+- **Configurable** — max depth, exclude patterns, tree style, root label, show/hide files
 
-## Output examples
+---
 
-**Tree**
+## Tree styles
+
+**Lines** (default)
 ```
 my-project/
 ├── src/
@@ -29,6 +32,50 @@ my-project/
 ├── styles.css
 └── manifest.json
 ```
+
+**Rounded**
+```
+my-project/
+├── src/
+│   ├── main.ts
+│   ╰── TreeView.ts
+├── styles.css
+╰── manifest.json
+```
+
+**ASCII**
+```
+my-project/
++-- src/
+|   +-- main.ts
+|   \-- TreeView.ts
++-- styles.css
+\-- manifest.json
+```
+
+**Minimal**
+```
+my-project/
+· src/
+·   · main.ts
+·   · TreeView.ts
+· styles.css
+· manifest.json
+```
+
+**Compact**
+```
+my-project/
+  src/
+    main.ts
+    TreeView.ts
+  styles.css
+  manifest.json
+```
+
+---
+
+## Copy formats
 
 **Paths**
 ```
@@ -53,12 +100,6 @@ my-project/manifest.json
 ---
 
 ## Installation
-
-### BRAT (recommended)
-
-1. Install [BRAT](https://github.com/TfTHacker/obsidian42-brat) from the Obsidian community plugins
-2. Open BRAT settings → "Add Beta Plugin"
-3. Enter `https://github.com/30jannik06/Obsidian-TreeGen`
 
 ### Manual
 
@@ -92,7 +133,7 @@ my-project/manifest.json
 | Max depth | 10 | How many folder levels deep to traverse |
 | Show files | On | Include files in the tree; disable for folders only |
 | Exclude patterns | `.obsidian,.git` | Comma-separated names to skip |
-| Indent style | Lines (│) | Visual hierarchy lines or plain spaces |
+| Tree style | Lines | Lines, Rounded, ASCII, Minimal, or Compact |
 | Root label | Folder name | Top-level label: folder name, full path, or none |
 
 ---

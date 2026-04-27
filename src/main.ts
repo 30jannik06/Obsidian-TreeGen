@@ -10,11 +10,28 @@ import {
 } from "obsidian";
 import { TREEGEN_VIEW_TYPE, TreeGenView } from "./TreeView";
 
+export type IndentStyle = "lines" | "rounded" | "ascii" | "minimal" | "compact";
+
+interface StyleDef {
+	branch: string;
+	last: string;
+	pipe: string;
+	indent: string;
+}
+
+export const INDENT_STYLES: Record<IndentStyle, StyleDef> = {
+	lines:   { branch: "├── ", last: "└── ", pipe: "│   ", indent: "    " },
+	rounded: { branch: "├── ", last: "╰── ", pipe: "│   ", indent: "    " },
+	ascii:   { branch: "+-- ", last: "\\-- ", pipe: "|   ", indent: "    " },
+	minimal: { branch: "· ",   last: "· ",   pipe: "  ",   indent: "  "   },
+	compact: { branch: "",     last: "",      pipe: "  ",   indent: "  "   },
+};
+
 interface TreeGenSettings {
 	maxDepth: number;
 	showFiles: boolean;
 	excludePatterns: string;
-	indentStyle: "lines" | "spaces";
+	indentStyle: IndentStyle;
 	rootName: "folder" | "path" | "none";
 }
 
@@ -149,13 +166,12 @@ export default class TreeGenPlugin extends Plugin {
 			? children
 			: children.filter((c) => c instanceof TFolder);
 
+		const style = INDENT_STYLES[this.settings.indentStyle];
+
 		visible.forEach((child, index) => {
 			const isLast = index === visible.length - 1;
-			const connector = isLast ? "└── " : "├── ";
-			const childPrefix =
-				this.settings.indentStyle === "lines"
-					? prefix + (isLast ? "    " : "│   ")
-					: prefix + "    ";
+			const connector = isLast ? style.last : style.branch;
+			const childPrefix = prefix + (isLast ? style.indent : style.pipe);
 
 			if (child instanceof TFolder) {
 				lines.push(prefix + connector + child.name + "/");
@@ -269,15 +285,18 @@ class TreeGenSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Indent style")
-			.setDesc("'Lines' uses │ for visual hierarchy. 'Spaces' uses plain spaces.")
+			.setName("Tree style")
+			.setDesc("Character style used for tree connectors.")
 			.addDropdown((drop) =>
 				drop
-					.addOption("lines", "Lines (│)")
-					.addOption("spaces", "Spaces")
+					.addOption("lines",   "Lines  (├── └── │)")
+					.addOption("rounded", "Rounded (├── ╰── │)")
+					.addOption("ascii",   "ASCII  (+-- \\-- |)")
+					.addOption("minimal", "Minimal (·)")
+					.addOption("compact", "Compact (indent only)")
 					.setValue(this.plugin.settings.indentStyle)
 					.onChange(async (value) => {
-						this.plugin.settings.indentStyle = value as "lines" | "spaces";
+						this.plugin.settings.indentStyle = value as IndentStyle;
 						await this.plugin.saveSettings();
 					})
 			);
