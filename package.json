@@ -1,6 +1,6 @@
 {
   "name": "obsidian-treegen",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Obsidian plugin to generate copyable ASCII folder/file trees",
   "main": "main.js",
   "scripts": {
