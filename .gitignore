@@ -20,3 +20,8 @@ Thumbs.db
 .idea/
 *.suo
 *.user
+
+# Graphify
+graphify-out/
+.graphify_*
+graphify_ast.py

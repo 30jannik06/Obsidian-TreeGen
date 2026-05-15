@@ -6,6 +6,14 @@ Inspired by the [JetBrains TreeGen plugin](https://plugins.jetbrains.com/plugin/
 
 ---
 
+## Preview
+
+![TreeGen panel](assets/preview.png)
+
+![Right-click menu](assets/preview.gif)
+
+---
+
 ## Features
 
 - **Side panel** — interactive tree view in the right sidebar, opened via ribbon icon
